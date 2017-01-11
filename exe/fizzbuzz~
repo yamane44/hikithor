@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+require "hikithor/hiki1"
+
+Fizzbuzz::CLI.start(ARGV)

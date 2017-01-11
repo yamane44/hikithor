@@ -1,0 +1,85 @@
+
+module Fizzbuzz
+   class Command
+#      DATA_FILE=File.join(ENV['HOME'],'.hikirc')
+#      attr_accessor :src, :target, :editor_command, :browser, :data_name, :l_dir
+=begin     
+     def initialize(argv=[])
+      @argv = argv
+      @data_name=['nick_name','local_dir','local_uri','global_dir','global_uri']
+      data_path = File.join(ENV['HOME'], '.hikirc')
+      DataFiles.prepare(data_path)
+      read_sources
+     end
+=end
+     def dump_sources
+      file = File.open(DATA_FILE,'w')
+      YAML.dump(@src, file)
+      file.close
+     end
+     
+     def check_display_size
+      @i_size,@n_size,@l_size,@g_size=3,5,30,15 #i,g_size are fixed            
+
+      n_l,l_l=0,0
+       @src[:srcs].each_with_index{|src,i|
+        n_l =(n_l= src[:nick_name].length)>@n_size? n_l:@n_size
+        l_l =(l_l= src[:local_dir].length)>@l_size? l_l:@l_size
+       }
+      @n_size,@l_size=n_l,l_l
+     end
+     
+     def display_format(id, name, local, global)
+      name_length  = @n_size-full_width_count(name)
+      local_length = @l_size-full_width_count(local)
+      global_string= global.size < @g_size ? global : global[0..@g_size]
+      [id.to_s.rjust(@i_size), name.ljust(name_length),
+               local.ljust(local_length),
+                          global_string.ljust(@g_size)].join(' | ')
+     end
+     
+     def full_width_count(string)
+       string.each_char.select{|char| !(/[ -~｡-ﾟ]/.match(char))}.count
+    end
+=begin
+    def read_sources
+      file = File.open(DATA_FILE,'r')
+      @src = YAML.load(file.read)
+      file.close
+      @target = @src[:target]
+      @l_dir=@src[:srcs][@target][:local_dir]
+      browser = @src[:browser]
+      @browser = (browser==nil) ? 'firefox' : browser
+      p editor_command = @src[:editor_command]
+      @editor_command = (editor_command==nil) ? 'open -a mi' : editor_command
+    end
+=end  
+  end
+end
+
+module DataFiles
+  def self.prepare(data_path)
+    create_file_if_not_exists(data_path)
+  end
+
+  def self.create_file_if_not_exists(data_path)
+    return if File::exists?(data_path)
+    create_data_file(data_path)
+  end
+
+  def self.create_data_file(data_path)
+    print "make #{data_path}\n"
+    init_data_file(data_path)
+  end
+
+  # initialize source file by dummy data                                        
+  def self.init_data_file(data_path)
+    @src = {:target => 0, :editor_command => 'open -a mi',
+      :srcs=>[{:nick_name => 'hoge', :local_dir => 'hogehoge', :local_uri => 'http://localhost/~hoge',
+                :global_dir => 'hoge@global_host:/hoge', :global_uri => 'http:/hoge'}]}
+    file = File.open(data_path,'w')
+    YAML.dump(@src,file)
+    file.close
+  end
+  private_class_method :create_file_if_not_exists, :create_data_file, :init_data_file
+end
