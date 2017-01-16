@@ -4,16 +4,17 @@ require 'hikidoc'
 require 'erb'
 require "hikithor/tmarshal"
 require "hikithor/infodb"
-require "hikithor/infodb"
+require "hikithor/hiki1"
 require 'systemu'
 require 'fileutils'
 require 'yaml'
 require 'pp'
 
-module Fizzbuzz
+module Hikithor
+
   DATA_FILE=File.join(ENV['HOME'],'.hikirc')
   attr_accessor :src, :target, :editor_command, :browser, :data_name, :l_dir
-
+ 
   class CLI < Thor
 HTML_TEMPLATE = <<EOS
 <!DOCTYPE html                                                            
@@ -31,7 +32,26 @@ HTML_TEMPLATE = <<EOS
 </body>                                                                        
 </html>                                                                       
 EOS
-    
+
+    def initialize(*args)
+      @data_name=['nick_name','local_dir','local_uri','global_dir','global_uri']
+      data_path = File.join(ENV['HOME'], '.hikirc')
+      DataFiles.prepare(data_path)
+
+      file = File.open(DATA_FILE,'r')            
+      @src = YAML.load(file.read)                     
+      file.close                                                      
+      @target = @src[:target]                             
+      @l_dir=@src[:srcs][@target][:local_dir]                 
+      browser = @src[:browser]                           
+      @browser = (browser==nil) ? 'firefox' : browser           
+      p editor_command = @src[:editor_command]            
+      @editor_command = (editor_command==nil) ? 'open -a mi' : editor_command
+      p @l_dir
+  
+    end
+
+=begin
     desc 'show', 'show sources'
     def show()
       printf("target_no:%i\n",@src[:target])
@@ -51,15 +71,16 @@ EOS
         puts display_format(id,name,local,global)
       }
     end
-
+=end
     desc 'version', 'show program version'
     def version
-      puts Fizzbuzz::VERSION
+      puts Hikithor::VERSION
     end
-
+=begin
     desc 'add', 'add sources info'
     def add
       cont = {}
+#      p @data_name
       @data_name.each{|name|
         printf("%s ? ", name)
         tmp = gets.chomp
@@ -74,9 +95,11 @@ EOS
       @src[:target] = val.to_i
       show
     end
-    
+=end  
     desc 'edit FILE', 'open file'
     def edit(file)
+#      Fizzbuzz::Command
+      p @l_dir
       t_file=File.join(@l_dir,'text',file)
       if !File.exist?(t_file) then
         file=File.open(t_file,'w')
@@ -86,7 +109,7 @@ EOS
       p command="#{@editor_command} #{t_file}"
       system command
     end
-    
+=begin    
     desc 'list [FILE]', 'list files'
     def list(file)
       file ='' if file==nil
@@ -170,8 +193,7 @@ EOS
         p file2_path = File.join(@l_dir,'text',files[1])
       rescue => evar
         puts evar.to_s
-        puts "error on move_files, check the input format, especially comma sep\
-aration."
+        puts "error on move_files, check the input format, especially comma separation."
         exit
       end
       return if file1_path==file2_path
@@ -232,54 +254,12 @@ aration."
       cont = File.readlines(file_path)
       cont.each{|line| puts line.toeuc }
     end
-  end
-  class command
-#=begin    
-    def dump_sources
-      file = File.open(DATA_FILE,'w')
-      YAML.dump(@src, file)
-      file.close
-    end
-#=end
-#=begin    
-    def check_display_size
-      @i_size,@n_size,@l_size,@g_size=3,5,30,15 #i,g_size are fixed                          
-      n_l,l_l=0,0
-      @src[:srcs].each_with_index{|src,i|
-        n_l =(n_l= src[:nick_name].length)>@n_size? n_l:@n_size
-        l_l =(l_l= src[:local_dir].length)>@l_size? l_l:@l_size
-      }
-      @n_size,@l_size=n_l,l_l
-    end
-#=end    
-    def display_format(id, name, local, global)
-      name_length  = @n_size-full_width_count(name)
-      local_length = @l_size-full_width_count(local)
-      global_string= global.size < @g_size ? global : global[0..@g_size]
-      [id.to_s.rjust(@i_size), name.ljust(name_length),
-               local.ljust(local_length),
-                          global_string.ljust(@g_size)].join(' | ')
-    end    
-#=begin    
-    def full_width_count(string)
-      string.each_char.select{|char| !(/[ -~｡-ﾟ]/.match(char))}.count
-    end
-    
-    def read_sources
-      file = File.open(DATA_FILE,'r')
-      @src = YAML.load(file.read)
-      file.close
-      @target = @src[:target]
-      @l_dir=@src[:srcs][@target][:local_dir]
-      browser = @src[:browser]
-      @browser = (browser==nil) ? 'firefox' : browser
-      p editor_command = @src[:editor_command]
-      @editor_command = (editor_command==nil) ? 'open -a mi' : editor_command
-    end
-#=end    
+=end
   end
 end
 
+
+#=begin
 module DataFiles
   def self.prepare(data_path)
     create_file_if_not_exists(data_path)
@@ -307,3 +287,4 @@ st/~hoge',
   end
   private_class_method :create_file_if_not_exists, :create_data_file, :init_data_file
 end
+#=end

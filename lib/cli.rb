@@ -10,25 +10,28 @@ require 'fileutils'
 require 'yaml'
 require 'pp'
 
-module Fizzbuzz
+module Hikithor
+
   DATA_FILE=File.join(ENV['HOME'],'.hikirc')
   attr_accessor :src, :target, :editor_command, :browser, :data_name, :l_dir
-  @data_name=['nick_name','local_dir','local_uri','global_dir','global_uri\
-']
-  data_path = File.join(ENV['HOME'], '.hikirc')
-  DataFiles.prepare(data_path)
 
-  file = File.open(DATA_FILE,'r')
-  @src = YAML.load(file.read)
-  file.close
-  @target = @src[:target]
-  @l_dir=@src[:srcs][@target][:local_dir]
-  browser = @src[:browser]
-  @browser = (browser==nil) ? 'firefox' : browser
-  p editor_command = @src[:editor_command]
-  @editor_command = (editor_command==nil) ? 'open -a mi' : editor_command
-  p @l_dir
+      def initialize(*args)
+      @data_name=['nick_name','local_dir','local_uri','global_dir','global_uri']
+      data_path = File.join(ENV['HOME'], '.hikirc')
+      DataFiles.prepare(data_path)
 
+      file = File.open(DATA_FILE,'r')
+      @src = YAML.load(file.read) 
+      file.close
+      @target = @src[:target]
+      @l_dir=@src[:srcs][@target][:local_dir]
+      browser = @src[:browser]
+      @browser = (browser==nil) ? 'firefox' : browser
+      p editor_command = @src[:editor_command]
+      @editor_command = (editor_command==nil) ? 'open -a mi' : editor_command
+    end
+
+   
   class CLI < Thor
 HTML_TEMPLATE = <<EOS
 <!DOCTYPE html                                                            
@@ -46,7 +49,28 @@ HTML_TEMPLATE = <<EOS
 </body>                                                                        
 </html>                                                                       
 EOS
-=begin    
+=begin
+    def initialize(*args)
+      @data_name=['nick_name','local_dir','local_uri','global_dir','global_uri']
+      data_path = File.join(ENV['HOME'], '.hikirc')
+      DataFiles.prepare(data_path)
+
+      file = File.open(DATA_FILE,'r')           
+      @src = YAML.load(file.read)
+#      p @src                     
+      file.close                                                      
+      @target = @src[:target]
+#      p @target                             
+      @l_dir=@src[:srcs][@target][:local_dir]                 
+      browser = @src[:browser]
+#      p browser                           
+      @browser = (browser==nil) ? 'firefox' : browser           
+      p editor_command = @src[:editor_command]            
+      @editor_command = (editor_command==nil) ? 'open -a mi' : editor_command
+#      p @l_dir
+    end
+=end
+=begin
     desc 'show', 'show sources'
     def show()
       printf("target_no:%i\n",@src[:target])
@@ -69,12 +93,13 @@ EOS
 =end
     desc 'version', 'show program version'
     def version
-      puts Fizzbuzz::VERSION
+      puts Hikithor::VERSION
     end
 =begin
     desc 'add', 'add sources info'
     def add
       cont = {}
+#      p @data_name
       @data_name.each{|name|
         printf("%s ? ", name)
         tmp = gets.chomp
@@ -92,7 +117,6 @@ EOS
 =end  
     desc 'edit FILE', 'open file'
     def edit(file)
-#      Fizzbuzz::Command
       p @l_dir
       t_file=File.join(@l_dir,'text',file)
       if !File.exist?(t_file) then
@@ -111,7 +135,7 @@ EOS
       print "target_dir : "+t_file+"\n"
       print `cd #{t_file} ; ls -lt #{file}*`
     end
-=end    
+    
     desc 'update FILE', 'update file'
     def update(file0)
       file = (file0==nil) ? 'FrontPage' : file0
@@ -125,7 +149,7 @@ EOS
       p "If you get open error, try rackup from the src_dir."
       p "If you get 整形式になっていません, try login as a valid user."
     end
-=begin    
+    
     desc 'rsync', 'rsync files'
     def rsync
       p local = @l_dir
@@ -251,7 +275,7 @@ EOS
 =end
   end
 end
-=begin
+
 module DataFiles
   def self.prepare(data_path)
     create_file_if_not_exists(data_path)
@@ -279,4 +303,4 @@ st/~hoge',
   end
   private_class_method :create_file_if_not_exists, :create_data_file, :init_data_file
 end
-=end
+

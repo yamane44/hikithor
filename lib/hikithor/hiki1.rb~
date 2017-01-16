@@ -1,7 +1,9 @@
 
 module Fizzbuzz
    class Command
-     
+#      DATA_FILE=File.join(ENV['HOME'],'.hikirc')
+#      attr_accessor :src, :target, :editor_command, :browser, :data_name, :l_dir
+=begin     
      def initialize(argv=[])
       @argv = argv
       @data_name=['nick_name','local_dir','local_uri','global_dir','global_uri']
@@ -9,7 +11,7 @@ module Fizzbuzz
       DataFiles.prepare(data_path)
       read_sources
      end
-
+=end
      def dump_sources
       file = File.open(DATA_FILE,'w')
       YAML.dump(@src, file)
@@ -39,7 +41,7 @@ module Fizzbuzz
      def full_width_count(string)
        string.each_char.select{|char| !(/[ -~｡-ﾟ]/.match(char))}.count
     end
-
+=begin
     def read_sources
       file = File.open(DATA_FILE,'r')
       @src = YAML.load(file.read)
@@ -50,10 +52,11 @@ module Fizzbuzz
       @browser = (browser==nil) ? 'firefox' : browser
       p editor_command = @src[:editor_command]
       @editor_command = (editor_command==nil) ? 'open -a mi' : editor_command
-    end  
+    end
+=end  
   end
 end
-
+=begin
 module DataFiles
   def self.prepare(data_path)
     create_file_if_not_exists(data_path)
@@ -75,8 +78,10 @@ module DataFiles
       :srcs=>[{:nick_name => 'hoge', :local_dir => 'hogehoge', :local_uri => 'http://localhost/~hoge',
                 :global_dir => 'hoge@global_host:/hoge', :global_uri => 'http:/hoge'}]}
     file = File.open(data_path,'w')
+    p file
     YAML.dump(@src,file)
     file.close
   end
   private_class_method :create_file_if_not_exists, :create_data_file, :init_data_file
 end
+=end

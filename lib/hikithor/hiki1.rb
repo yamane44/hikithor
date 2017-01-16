@@ -56,7 +56,7 @@ module Fizzbuzz
 =end  
   end
 end
-
+#=begin
 module DataFiles
   def self.prepare(data_path)
     create_file_if_not_exists(data_path)
@@ -78,8 +78,10 @@ module DataFiles
       :srcs=>[{:nick_name => 'hoge', :local_dir => 'hogehoge', :local_uri => 'http://localhost/~hoge',
                 :global_dir => 'hoge@global_host:/hoge', :global_uri => 'http:/hoge'}]}
     file = File.open(data_path,'w')
+    p file
     YAML.dump(@src,file)
     file.close
   end
   private_class_method :create_file_if_not_exists, :create_data_file, :init_data_file
 end
+#=end
